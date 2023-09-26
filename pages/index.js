@@ -2,47 +2,49 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 export default function Home() {
-  // hook metotları
+  //only
+  useEffect(() => {
+    console.log("loading seed/saved data");
+    setTodos(seedData());
+  }, []);
+
+  console.log("rendering Home");
+
   const [title, setTitle] = useState("");
-  const titleChanged = function (e) {
-    setTitle(e.target.value);
-  };
-
-  const [todos, setTodos] = useState([
-    { title: "Do homework", done: false },
-    { title: "Wash the dishes", done: false },
-    { title: "Watch Netflix", done: true },
-    { title: "Walk in the park", done: true }
-  ]);
-
-  // bunu tercih etmeyeceğiz. div üreterek içine koymak
-  // const divler = [];
-  // for (const todo of todos) {
-  //   divler.push(<div>{todo.title}</div>)
-  // }
+  const [todos, setTodos] = useState([]);
 
   const handleSubmit = function (e) {
     e.preventDefault();
-    setTodos([...todos, { title: title, done: false }]);
+    const newTodos = [...todos, { title, done: false }];
+    setTodos(newTodos);
     setTitle("");
+    saveChanges(newTodos);
   };
 
-  const handleCheckChange = function (e, i) {
+  const handleCheckChange = function (e, index) {
     const newTodos = [...todos];
-    newTodos[i].done = e.target.checked;
+    newTodos[index].done = e.target.checked;
     setTodos(newTodos);
+    saveChanges(newTodos);
   };
 
-  const handleDelete = function (e, i) {
+  const handleDelete = function (e, index) {
     const newTodos = [...todos];
-    newTodos.splice(i, 1);  // iden başla 1 tane sil
+    newTodos.splice(index, 1);
     setTodos(newTodos);
+    saveChanges(newTodos);
   };
+
+  const saveChanges = function (data) {
+    const json = JSON.stringify(data);
+    localStorage["data"] = json;
+  }
+
   return (
     <>
       <Head>
@@ -55,24 +57,34 @@ export default function Home() {
         <h1>To-Do List</h1>
         <form onSubmit={handleSubmit}>
           <div>
-            <input type="text" placeholder='What are you going to do?' required onChange={titleChanged} />
+            <input type="text" value={title} placeholder='What are you going to do?' required onChange={e => setTitle(e.target.value)} />
             <button>Add</button>
-            {/* {divler} */}
-
-            {/*// todos dizisini div dizisine çevirdik. */}
-
-            <div className={styles.todos}>
-              {todos.map((todo, i) =>
-                <div key={i + 1} className={styles.todoItem + " " + (todo.done ? styles.done : styles.undone)}>
-                  <input type="checkbox" checked={todo.done} onChange={(e) => handleCheckChange(e, i)} />
-                  <span>{todo.title}</span>
-                  <button onClick={(e) => handleDelete(e, i)}>&times;</button>
-                </div>
-              )}
-            </div>
           </div>
         </form>
+        <div className={styles.todos}>
+          {todos.map((todo, i) =>
+            <div key={i} className={styles.todoItem + " " + (todo.done ? styles.done : styles.undone)}>
+              <input type="checkbox" checked={todo.done}
+                onChange={(e) => handleCheckChange(e, i)} />
+              <span>{todo.title}</span>
+              <button onClick={(e) => handleDelete(e, i)}>&times;</button>
+            </div>
+          )}
+        </div>
       </main>
     </>
   )
 }
+
+function seedData() {
+  if (localStorage["data"]) {
+    return JSON.parse(localStorage["data"]);
+  } else {
+    return [
+      { title: "Do your homework", done: false },
+      { title: "Wash the dishes", done: false },
+      { title: "Watch Netflix", done: true },
+      { title: "Walk in the park", done: true }
+    ];
+  }
+};
