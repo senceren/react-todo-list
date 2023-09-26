@@ -7,11 +7,42 @@ import { useState } from 'react'
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-  const [sayi, setSayi] = useState(0); // durumu değiştiren metot ve sayi ataması yapılyor.
-  const numberChanged = function (e) {
-    setSayi(e.target.value);  // fonk içindeki e değeri bu eventin tetiklendiği element 
+  // hook metotları
+  const [title, setTitle] = useState("");
+  const titleChanged = function (e) {
+    setTitle(e.target.value);
   };
 
+  const [todos, setTodos] = useState([
+    { title: "Do homework", done: false },
+    { title: "Wash the dishes", done: false },
+    { title: "Watch Netflix", done: true },
+    { title: "Walk in the park", done: true }
+  ]);
+
+  // bunu tercih etmeyeceğiz. div üreterek içine koymak
+  // const divler = [];
+  // for (const todo of todos) {
+  //   divler.push(<div>{todo.title}</div>)
+  // }
+
+  const handleSubmit = function (e) {
+    e.preventDefault();
+    setTodos([...todos, { title: title, done: false }]);
+    setTitle("");
+  };
+
+  const handleCheckChange = function (e, i) {
+    const newTodos = [...todos];
+    newTodos[i].done = e.target.checked;
+    setTodos(newTodos);
+  };
+
+  const handleDelete = function (e, i) {
+    const newTodos = [...todos];
+    newTodos.splice(i, 1);  // iden başla 1 tane sil
+    setTodos(newTodos);
+  };
   return (
     <>
       <Head>
@@ -22,12 +53,25 @@ export default function Home() {
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <h1>To-Do List</h1>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Cum sapiente, illo ea tempora molestiae enim. Ab, commodi omnis porro, autem quibusdam eaque at architecto ipsa blanditiis alias optio hic quo!</p>
-        <p>{2 * 2}</p>
-        <p>{new Date().toDateString()}</p>
-        <input type="number" onChange={numberChanged} />
-        <p>Girilen değer: {sayi} </p>
-        <p>Girilen sayı bir {sayi % 2 == 0 ? <strong>çift</strong> : <strong>tek</strong>} sayidir.</p>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <input type="text" placeholder='What are you going to do?' required onChange={titleChanged} />
+            <button>Add</button>
+            {/* {divler} */}
+
+            {/*// todos dizisini div dizisine çevirdik. */}
+
+            <div className={styles.todos}>
+              {todos.map((todo, i) =>
+                <div key={i + 1} className={styles.todoItem + " " + (todo.done ? styles.done : styles.undone)}>
+                  <input type="checkbox" checked={todo.done} onChange={(e) => handleCheckChange(e, i)} />
+                  <span>{todo.title}</span>
+                  <button onClick={(e) => handleDelete(e, i)}>&times;</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </form>
       </main>
     </>
   )

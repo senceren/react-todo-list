@@ -1,1 +1,26 @@
 .main {}
+
+.done {}
+
+.undone {}
+
+.done>span {
+  text-decoration: line-through;
+}
+
+.todoItem {
+  display: flex;
+  padding: .5rem;
+}
+
+.todoItem>button {
+  margin-left: auto;
+}
+
+.todoItem:nth-child(odd) {
+  background-color: #f0f0f0;
+}
+
+.todos {
+  margin-top: 1rem;
+}
